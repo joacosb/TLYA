@@ -1,269 +1,223 @@
 # Teoría de los Lenguajes y Algoritmos — Sistema de Notas (WinForms)
-## Hola, alumnos 👋
+## Hola, alumnos
 
-La idea de este proyecto es que ya tengan la navegación entre pantallas y la estructura base lista, para enfocarse en lógica, POO y validaciones.
-Más adelante, en Construcción de Aplicaciones Informáticas, verán cómo escalar estas ideas.
+Este proyecto les da una base navegable en WinForms para enfocarse en lógica, POO (programación orientada a objetos) y validaciones. La idea es que completen y mejoren la lógica para cumplir la consigna y practicar lo visto en clase (y lo que verán en Construcción de Aplicaciones Informáticas). 💪
 
-## 🚀 Cómo corre el programa
+## Tecnologías
 
-Program.cs crea una única instancia del servicio CursadaService (estado compartido).
+.NET / C# (Windows Forms)
 
-Abre SetupInicialForm (pestañas):
+Patrón simple de Modelos + Servicio de dominio + Formularios (UI)
 
-Fechas: examen 1/2/3 y recuperatorio (dd/mm) en orden creciente.
+Cómo ejecutar
 
-Alumnos: alta/edición/borrado; validaciones básicas; grilla con datos.
+Abrí la solución en Visual Studio.
 
-Si el setup termina en OK, se abre MenuPrincipalForm con el mismo servicio.
+Ejecutá (F5).
 
-Desde el menú: Submenú 1/2/3 (consultas, estadísticas y utilidades).
+Flujo: Setup inicial (Fechas → Alumnos) → Menú principal → Submenús 1/2/3.
 
-## 🗂️ Estructura del proyecto
-SistemaNotasTLYA/
+## Estructura del proyecto
+
+/ (raíz)
 ├─ Models/
-│  └─ Alumno.cs
+│ └─ Alumno.cs
 ├─ Services/
-│  └─ CursadaService.cs
-├─ Forms/
-│  ├─ SetupInicialForm.cs      (+ .Designer.cs/.resx)
-│  ├─ MenuPrincipalForm.cs     (+ ...)
-│  ├─ Submenu1Form.cs          (+ ...)
-│  ├─ Submenu2Form.cs          (+ ...)
-│  └─ Submenu3Form.cs          (+ ...)
-└─ Program.cs
+│ └─ CursadaService.cs
+├─ Forms (los nombres pueden variar según tu repo)
+│ ├─ SetupInicialForm.cs (+ .Designer.cs/.resx) ← o SetUpInicialForm.cs
+│ ├─ MenuPrincipalForm.cs (+ .Designer.cs/.resx)
+│ ├─ Submenu1Form.cs (+ .Designer.cs/.resx)
+│ ├─ Submenu2Form.cs (+ .Designer.cs/.resx)
+│ └─ Submenu3Form.cs (+ .Designer.cs/.resx)
+├─ Program.cs
+└─ README.md
 
+Los formularios son partial: el .Designer.cs contiene controles e InitializeComponent(); el .cs tiene la lógica (eventos, llamadas al servicio, validaciones de UI).
 
-Los formularios son partial: el .Designer.cs contiene los controles y InitializeComponent(). El .cs tiene la lógica y los eventos (Click, etc.).
+## Flujo de la aplicación
 
-## 🧱 Modelo de datos (Objetos)
-Alumno (entidad del dominio)
+Program.cs crea una única instancia de CursadaService (estado compartido).
 
-Propiedades (ejemplo):
+Se abre SetupInicialForm (pestañas):
+• Fechas: Examen 1/2/3 + Recuperatorio (dd/mm) en orden creciente.
+• Alumnos: alta/edición/borrado con validaciones y grilla para visualizar.
 
-string Nombre, string Apellido
+Si el setup finaliza en OK, se abre MenuPrincipalForm.
 
-int Registro (100000–999999, único)
+Desde el menú se navega a Submenú 1, Submenú 2 y Submenú 3.
 
-List<int> Notas (3 parciales, 0–10)
+## Modelo de datos (Objetos)
+### Alumno
 
-Derivadas: double Promedio, string Condicion, string SituacionFinal
+Responsabilidad: representar un alumno y sus calificaciones.
 
-Reglas:
+Atributos principales (típicos):
 
-Ausente ⇢ cuando el promedio es 0.
+Nombre : string (no vacío)
 
-Nombre/Apellido no vacíos; Notas en rango; Registro válido y no repetido.
+Apellido : string (no vacío)
 
-Responsabilidad: representa un alumno y sus calificaciones.
+Registro : int (100000–999999, único)
 
-POO – Encapsulamiento: los datos y las invariantes del alumno se manipulan a través del servicio para mantener consistencia.
+Notas : List<int> (3 parciales en 0..10)
 
-## 🧰 Servicio (capa de dominio)
-CursadaService
+#### Derivados (calculados):
 
-Estado compartido:
+Promedio : double
 
-List<Alumno> Alumnos
+Condicion : string
 
-List<DateTime> FechasExamenesYRecuperatorios (Ex1, Ex2, Ex3, Recuperatorio)
+SituacionFinal : string
 
-Operaciones (resumen típico):
+## Reglas:
 
-Setup: SetFechasExamenesYRecuperatorios(fechas)
+Un alumno es AUSENTE cuando Promedio == 0.
 
-ABM:
+Registro dentro de rango y sin duplicados.
 
-bool AgregarAlumno(Alumno a, out string? error)
+Notas dentro de 0..10.
 
-bool Editar(int registro, string nombre, string apellido, List<int> notas, out string? error)
+Encapsulamiento: se recomienda calcular Promedio/Condicion/Situacion desde el servicio o un método del modelo para mantener coherencia.
 
-bool Borrar(int registro)
+## Servicio de dominio
+### CursadaService
 
-Alumno? Buscar(int registro)
+Responsabilidad: orquestar reglas, mantener el estado y ofrecer operaciones a la UI.
+
+Estado:
+- Alumnos : List<Alumno>
+- FechasExamenesYRecuperatorios : List<DateTime> (Ex1, Ex2, Ex3, Recuperatorio)
+Operaciones típicas:
+Setup
+SetFechasExamenesYRecuperatorios(List<DateTime>)
+ABM
+AgregarAlumno(Alumno, out string? error)
+Editar(int registro, string nombre, string apellido, List<int> notas, out string? error)
+Borrar(int registro)
+Buscar(int registro) : Alumno?
 
 Consultas:
-
-IEnumerable<Alumno> Ausentes()
-
-IEnumerable<Alumno> Insuficientes()
-
-IEnumerable<Alumno> Regularizados()
-
-Estadística:
-
-PorCondicionCursada() → (cantidades/porcentajes)
-
-PorSituacionFinal() → (cantidades/porcentajes)
-
-ModaNotas() → (notaModa, repeticiones, alumnosUnicos)
+Ausentes() — Insuficientes() — Regularizados()
+PorCondicionCursada() — PorSituacionFinal()
+ModaNotas() : (int nota, int repeticiones, int alumnosUnicos)
 
 Utilidades:
+OrdenarPorRegistro() — UnificarDatos()
 
-OrdenarPorRegistro()
+Composición: el servicio compone alumnos y concentra las reglas.
+Inyección simple: la misma instancia se pasa a todas las pantallas para que vean el mismo estado.
 
-UnificarDatos() (si hay registros duplicados, mantiene el primero)
+## Formularios (UI y eventos)
+SetupInicialForm (o SetUpInicialForm)
 
-POO – Composición: el servicio compone una lista de Alumno.
-Herencia: los formularios heredan de Form.
-Polimorfismo (práctico): todos los handlers de eventos siguen la misma firma object, EventArgs y apuntan a métodos distintos; también es lugar natural para agregar interfaces si diseñan estrategias (p. ej., distintos criterios de promoción).
+Fechas: valida formato dd/mm y orden creciente (Ex1 < Ex2 < Ex3 < Recuperatorio).
 
-## 🖼️ Formularios (UI y eventos)
+Alumnos: entradas + DataGridView. Eventos: Agregar, Editar, Borrar, Finalizar.
 
-SetupInicialForm
-
-TabFechas: valida formato dd/mm y que Ex1 < Ex2 < Ex3 < Recup.
-
-TabAlumnos: entradas, validaciones, ABM y DataGridView.
-
-Bloquea navegar a “Alumnos” hasta que las fechas estén OK.
+Al Finalizar devuelve DialogResult.OK y se abre el menú.
 
 MenuPrincipalForm
 
-Abre Submenús inyectando el mismo CursadaService.
+Pantalla de navegación. Abre Submenús 1/2/3 con la misma instancia de CursadaService.
 
 Submenu1Form
 
-Muestra listados (ausentes, insuficientes, etc.).
+Listados (Ausentes, Insuficientes, Listado completo, Notas, Regularizados).
 
-Implementación simple: salida en TextBox multiline con fuente monoespaciada/tabla.
+Implementación simple: salida ordenada en TextBox monoespaciado (o DataGridView si se desea).
 
 Submenu2Form
 
-Consulta fechas ya cargadas (no las edita), promedios y distribuciones, conteos por condición/situación, borrado por registro.
+Consulta de Fechas (ya no se cargan aquí), conteos por Condición y por Situación, Promedios por alumno, Borrar por registro.
 
 Submenu3Form
 
-Buscar/ Editar alumno, Moda de notas, Ordenar por registro, Unificar duplicados.
+Buscar / Editar alumno, Moda de notas, Ordenar por registro, Unificar duplicados.
 
-Event-driven: el flujo se dispara por eventos de UI (Click, SelectionChanged, etc.). Los formularios no guardan estado global: delegan en CursadaService.
+## Validaciones (qué y dónde)
 
-## ✅ Validaciones (dónde y por qué)
-
-Fechas (Setup):
-
-Formato dd/mm
-
-Orden creciente: Ex1 < Ex2 < Ex3 < Recuperatorio
+Fechas: dd/mm y orden creciente (setup).
 
 Alumno:
-
-Nombre/Apellido no vacíos
-
-Registro en rango y único
-
-Notas en 0..10
+• Nombre/Apellido no vacíos → validación en UI y/o servicio.
+• Registro en rango y único → servicio.
+• Notas en 0..10 → UI y/o servicio.
 
 Estado derivado:
+• Promedio y AUSENTE cuando Promedio == 0.
+• Otras categorías (INSUFICIENTE/REGULARIZADO/APROBADO) según reglas de cátedra.
 
-Ausente ⇢ Promedio == 0
+Buena práctica: centralizar reglas de negocio en el servicio evita duplicación entre pantallas.
 
-Otras categorías (Insuficiente/Regularizado/Aprobado) según reglas de cátedra
+## Teoría aplicada (mini-snippets didácticos)
+Decisión (if / switch)
 
-Centralizar las reglas en el Servicio evita que cada form invente sus propias condiciones.
-
-## 🧩 Ejemplos de teoría (mini-snippets)
-1) Estructuras de decisión (if/else, switch)
-// validar registro
+Registro válido
 if (registro < 100000 || registro > 999999)
 {
-    error = "Registro fuera de rango (100000..999999)";
-    return false;
+error = "Registro fuera de rango (100000..999999)";
+return false;
 }
 
-// determinar situación final (ejemplo genérico)
-string SituacionDe(double promedio) => promedio switch
+Situación final (ejemplo)
+string SituacionDe(double prom) => prom switch
 {
-    0       => "AUSENTE",
-    < 4.0   => "INSUFICIENTE",
-    < 7.0   => "REGULARIZADO",
-    _       => "APROBADO"
+0 => "AUSENTE",
+< 4.0 => "INSUFICIENTE",
+< 7.0 => "REGULARIZADO",
+_ => "APROBADO"
 };
 
-2) Estructuras de repetición (for, foreach, while)
-// recorrer alumnos y mostrar promedio
-foreach (var a in Alumnos)
-{
-    Console.WriteLine($"{a.Registro} - {a.Apellido}, {a.Nombre}: {a.Promedio:0.##}");
-}
+Repetición (for / foreach / while)
 
-// pedir 4 fechas válidas (muestra while con reintentos)
+Recorrer alumnos
+foreach (var a in Alumnos)
+Console.WriteLine($"{a.Registro} - {a.Apellido}, {a.Nombre}: {a.Promedio:0.##}");
+
+Cargar 4 fechas válidas con reintentos
 for (int i = 0; i < 4; i++)
 {
-    bool ok = false;
-    while (!ok)
-    {
-        string s = Pedir("Fecha (dd/mm): ");
-        ok = TryParseDiaMes(s, out var dt);
-    }
+bool ok = false;
+while (!ok)
+{
+var s = Pedir("Fecha (dd/mm): ");
+ok = TryParseDiaMes(s, out var _);
+}
 }
 
-3) Funciones vs. procedimientos
-// función: devuelve un valor (pura en lo posible)
+## Funciones vs. Procedimientos
+
+Función (devuelve valor, idealmente pura)
 double PromedioDe(List<int> notas) => notas.Count == 0 ? 0 : notas.Average();
 
-// procedimiento: cambia estado (efecto)
+Procedimiento (cambia estado)
 void OrdenarPorRegistro() => Alumnos.Sort((a, b) => a.Registro.CompareTo(b.Registro));
 
-4) POO: encapsulamiento, herencia, polimorfismo
+POO (encapsulamiento, herencia, polimorfismo)
 
-Encapsulamiento: CursadaService decide cómo se agregan/validan alumnos; los forms no manipulan la lista “a mano”.
+Encapsulamiento: Forms piden al servicio agregar/editar/borrar; no manipulan la lista “a mano”.
 
-Herencia: todos los formularios : Form.
+Herencia: todos los formularios heredan de Form.
 
-Polimorfismo (simple y visible en WinForms):
+Polimorfismo (delegados de eventos): múltiples handlers compatibles con EventHandler
+btnBuscar.Click += btnBuscar_Click; // (object, EventArgs)
+btnEditar.Click += btnEditar_Click;
+btnBorrar.Click += btnBorrar_Click;
 
-// todos estos métodos son "polimórficos" bajo el mismo delegado EventHandler
-btnBuscar.Click   += btnBuscar_Click;   // (object, EventArgs)
-btnEditar.Click   += btnEditar_Click;   // (object, EventArgs)
-btnBorrar.Click   += btnBorrar_Click;   // ...
+## Interacción entre componentes
 
-## 🔄 Flujo de datos (quién habla con quién)
+[Program] → (CursadaService compartido)
+├─ SetupInicialForm (Fechas + ABM Alumnos)
+└─ MenuPrincipalForm
+├─ Submenu1Form (listados)
+├─ Submenu2Form (estadísticas/consultas)
+└─ Submenu3Form (gestión puntual)
 
-Forms ⇄ CursadaService ⇄ Models
-
-Program crea una instancia de CursadaService y se la inyecta a todos los formularios (constructor).
-
-Los Submenús leen/escriben a través del Servicio para ver siempre el mismo estado.
-
-Diagrama textual:
-
-[Program] ──crea──> (CursadaService)
-   │                        ▲
-   ├── SetupInicialForm ────┤ (carga fechas + ABM alumnos)
-   └── MenuPrincipalForm ───┼──> Submenu1/2/3 (consultas y utilidades)
-
-🧪 Ideas para extender (práctica sugerida)
-
+## Ideas para extender
 Persistencia: Guardar/Cargar en JSON/CSV.
-
 Enums para Condicion y SituacionFinal.
-
-Interfaz ICriterioAprobacion con implementaciones alternativas (polimorfismo real).
-
+Interfaces (p. ej. ICriterioAprobacion) para estrategias alternativas de promoción (polimorfismo real).
 Reportes: top N promedios, histograma de notas, etc.
 
-Tests unitarios de lógica del servicio.
-
-📦 Git / .gitignore (resumen)
-
-Colocá un .gitignore en la raíz (donde está la .sln) para ignorar .vs/, bin/, obj/, etc. Ejemplo mínimo:
-
-## Visual Studio
-.vs/
-*.user
-*.rsuser
-*.csproj.user
-
-## Build
-[Bb]in/
-[Oo]bj/
-[Dd]ebug/
-[Rr]elease/
-x64/
-x86/
-TestResults/
-
-## 📚 Créditos
-
-Proyecto docente para Teoría de los Lenguajes y Algoritmos.
-Navegación y base de código pensadas para practicar POO, validaciones y estructuras de control en C# / WinForms.
+Tests unitarios de la lógica de CursadaService.
